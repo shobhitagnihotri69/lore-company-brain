@@ -1,0 +1,4 @@
+# Name merging: wrong spelling -> right GitHub login.
+# Every login the loaders read passes through this map (after lowercasing).
+# Add a line only after a person has checked that both names are the same human.
+liggit: liggitt

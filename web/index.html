@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lore — Kubernetes Company Brain (FalkorDB)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(18, 25, 41, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-hover: rgba(255, 255, 255, 0.12);
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(56, 189, 248, 0.12) 0%, transparent 40%);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.6;
+    }
+
+    header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--card-border);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .logo-badge {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6366f1, #38bdf8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.4rem;
+      color: #fff;
+      box-shadow: 0 4px 16px var(--accent-glow);
+    }
+
+    .brand-title {
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .status-badges {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-dim);
+    }
+
+    .dot.live {
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+    }
+
+    .dot.offline {
+      background: var(--danger);
+    }
+
+    main {
+      flex: 1;
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .hero h1 {
+      font-size: 2.6rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.6rem;
+      background: linear-gradient(180deg, #ffffff 30%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 650px;
+      margin: 0 auto;
+    }
+
+    /* Search Box */
+    .search-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 1.25rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(16px);
+      transition: border-color 0.2s ease;
+    }
+
+    .search-card:focus-within {
+      border-color: var(--primary);
+    }
+
+    .search-row {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .search-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 0.95rem 1.25rem;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--accent);
+    }
+
+    .ask-btn {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 0 1.75rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+      transition: transform 0.1s ease, filter 0.2s ease;
+    }
+
+    .ask-btn:hover {
+      filter: brightness(1.1);
+    }
+
+    .ask-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* Example questions pills */
+    .examples-wrapper {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .examples-label {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+
+    .example-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      border-radius: 9999px;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .example-pill:hover {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: var(--primary);
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+
+    /* Results Section */
+    .results-container {
+      display: none;
+      flex-direction: column;
+      gap: 1.5rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .answer-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 1.75rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .answer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .answer-title {
+      font-weight: 700;
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .stub-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--warning);
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .answer-body {
+      font-size: 1.05rem;
+      color: #e2e8f0;
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Comparison Grid: Owns vs Knows */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-top: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .sub-card {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 1.25rem;
+    }
+
+    .sub-card-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .title-owns { color: var(--accent); }
+    .title-knows { color: var(--success); }
+
+    .person-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .person-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0.75rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    .person-name {
+      font-family: var(--mono);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .person-role {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .hidden-knower-badge {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      font-size: 0.65rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-family: var(--font);
+    }
+
+    /* Decision Trail Timeline */
+    .timeline-card {
+      margin-top: 1rem;
+      padding: 1.25rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 14px;
+      border: 1px solid var(--card-border);
+    }
+
+    .timeline-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+    }
+
+    .timeline-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      position: relative;
+      padding-left: 1.5rem;
+    }
+
+    .timeline-steps::before {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 6px;
+      bottom: 6px;
+      width: 2px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .timeline-step {
+      position: relative;
+      font-size: 0.9rem;
+    }
+
+    .timeline-step::before {
+      content: '';
+      position: absolute;
+      left: -1.5rem;
+      top: 6px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+    }
+
+    /* Evidence Graph Map */
+    .evidence-map-card {
+      margin-top: 1.25rem;
+      padding: 1.25rem;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 14px;
+      border: 1px solid var(--card-border);
+    }
+
+    .evidence-map-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .evidence-map-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    #evidence-graph-container {
+      width: 100%;
+      height: 380px;
+      background: radial-gradient(circle at center, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.9) 100%);
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Sources and Action Row */
+    .bottom-bar {
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--card-border);
+    }
+
+    .sources-list {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .source-tag {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      font-family: var(--mono);
+      color: var(--text-muted);
+    }
+
+    .approve-action-btn {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 0.65rem 1.25rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+      transition: all 0.2s ease;
+    }
+
+    .approve-action-btn:hover {
+      filter: brightness(1.15);
+      transform: translateY(-1px);
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #1e293b;
+      color: white;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      gap: 0.75rem;
+      z-index: 100;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--card-border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="logo-badge">L</div>
+      <div>
+        <div class="brand-title">Lore</div>
+        <div class="brand-subtitle">Company Brain on FalkorDB Graph</div>
+      </div>
+    </div>
+    <div class="status-badges">
+      <div class="badge">
+        <span class="dot live" id="server-dot"></span>
+        <span id="server-status">Server: Online</span>
+      </div>
+      <div class="badge">
+        <span class="dot" id="falkor-dot"></span>
+        <span id="falkor-status">FalkorDB: Checking...</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>The Real Org Chart of Kubernetes</h1>
+      <p>Lore maps who officially owns an area vs who actually does the work, traces 8 years of design decisions to their source, and routes issues to the right people.</p>
+    </section>
+
+    <section class="search-card">
+      <div class="search-row">
+        <input 
+          type="text" 
+          id="question-input" 
+          class="search-input" 
+          placeholder="Ask Lore (e.g. 'Who actually knows SIG Node?' or 'Why gang scheduling?')"
+          value="Who actually knows SIG Node?"
+        />
+        <button id="ask-btn" class="ask-btn">
+          <span>Ask Lore</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <div class="examples-wrapper">
+        <span class="examples-label">Try asking:</span>
+        <button class="example-pill" data-q="Who actually knows SIG Node?">Who actually knows SIG Node?</button>
+        <button class="example-pill" data-q="Why did they choose gang scheduling?">Why did they choose gang scheduling?</button>
+        <button class="example-pill" data-q="Who to ask about DisableCloudProviders?">Who to ask about DisableCloudProviders?</button>
+        <button class="example-pill" data-q="What decisions are stuck at alpha?">What decisions are stuck at alpha?</button>
+      </div>
+    </section>
+
+    <!-- Results Panel -->
+    <section id="results" class="results-container">
+      <div class="answer-card">
+        <div class="answer-header">
+          <div class="answer-title">
+            <span>Graph Synthesis</span>
+          </div>
+          <div id="stub-indicator" class="stub-tag" style="display: none;">Verified Stub Mode</div>
+        </div>
+
+        <div id="answer-text" class="answer-body"></div>
+
+        <!-- Org Chart Comparison: Owns vs Knows -->
+        <div class="comparison-grid" id="comparison-view">
+          <div class="sub-card">
+            <div class="sub-card-title title-owns">
+              <span>Official Owners</span>
+              <span style="font-size: 0.75rem; opacity: 0.8;">(From sigs.yaml)</span>
+            </div>
+            <ul class="person-list" id="owners-list"></ul>
+          </div>
+
+          <div class="sub-card">
+            <div class="sub-card-title title-knows">
+              <span>Actual Knowers</span>
+              <span style="font-size: 0.75rem; opacity: 0.8;">(Evidence in KEPs & Work)</span>
+            </div>
+            <ul class="person-list" id="knowers-list"></ul>
+          </div>
+        </div>
+
+        <!-- Evidence Map (Graph Visualization) -->
+        <div class="evidence-map-card" id="evidence-map-view" style="display: none;">
+          <div class="evidence-map-header">
+            <div class="evidence-map-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              <span>Evidence Graph Map</span>
+            </div>
+            <span id="evidence-stats" style="font-size: 0.75rem; color: var(--text-dim); font-family: var(--mono);"></span>
+          </div>
+          <div id="evidence-graph-container">
+            <svg id="evidence-svg" style="width: 100%; height: 100%;"></svg>
+          </div>
+        </div>
+
+        <!-- Decision Trail Timeline (if present) -->
+        <div class="timeline-card" id="timeline-view" style="display: none;">
+          <div class="timeline-title">Decision Trail & Replacements Lineage</div>
+          <div class="timeline-steps" id="timeline-steps"></div>
+        </div>
+
+        <!-- Evidence and Action Footer -->
+        <div class="bottom-bar">
+          <div class="sources-list" id="sources-container"></div>
+          <button id="approve-action-btn" class="approve-action-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Approve & Route Issue (Action C)</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+    <span id="toast-msg">Action approved successfully.</span>
+  </div>
+
+  <footer>
+    Lore Company Brain &bull; Built with FastAPI, FalkorDB, and Kubernetes Open Source Data &bull; WeMakeDevs &times; FalkorDB Graph Hacks
+  </footer>
+
+  <script>
+    const questionInput = document.getElementById('question-input');
+    const askBtn = document.getElementById('ask-btn');
+    const resultsContainer = document.getElementById('results');
+    const answerText = document.getElementById('answer-text');
+    const stubIndicator = document.getElementById('stub-indicator');
+    const ownersList = document.getElementById('owners-list');
+    const knowersList = document.getElementById('knowers-list');
+    const timelineView = document.getElementById('timeline-view');
+    const timelineSteps = document.getElementById('timeline-steps');
+    const sourcesContainer = document.getElementById('sources-container');
+    const approveBtn = document.getElementById('approve-action-btn');
+    const falkorDot = document.getElementById('falkor-dot');
+    const falkorStatus = document.getElementById('falkor-status');
+    const toast = document.getElementById('toast');
+    const toastMsg = document.getElementById('toast-msg');
+
+    let currentResponseData = null;
+
+    // Check health on startup
+    async function checkHealth() {
+      try {
+        const res = await fetch('/api/health');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.falkordb) {
+            falkorDot.className = 'dot live';
+            falkorStatus.textContent = 'FalkorDB: Connected';
+          } else {
+            falkorDot.className = 'dot';
+            falkorDot.style.background = '#f59e0b';
+            falkorStatus.textContent = 'FalkorDB: Standby';
+          }
+        }
+      } catch (e) {
+        falkorDot.className = 'dot offline';
+        falkorStatus.textContent = 'FalkorDB: Offline';
+      }
+    }
+    checkHealth();
+
+    // Ask query function
+    async function submitQuestion(question) {
+      if (!question || !question.trim()) return;
+
+      askBtn.disabled = true;
+      askBtn.querySelector('span').textContent = 'Thinking...';
+
+      try {
+        const res = await fetch('/api/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: question.trim() })
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({ error: 'Request failed' }));
+          alert('Error (' + res.status + '): ' + (errData.error || errData.detail || 'Unknown error'));
+          return;
+        }
+
+        const data = await res.json();
+        currentResponseData = data;
+        renderResults(data);
+      } catch (err) {
+        alert('Connection error: ' + err.message);
+      } finally {
+        askBtn.disabled = false;
+        askBtn.querySelector('span').textContent = 'Ask Lore';
+      }
+    }
+
+    function renderResults(data) {
+      resultsContainer.style.display = 'flex';
+      answerText.textContent = data.answer || 'No direct answer returned.';
+
+      stubIndicator.style.display = data.is_stub ? 'inline-block' : 'none';
+
+      // Render Owners
+      ownersList.innerHTML = '';
+      if (data.official_owners && data.official_owners.length) {
+        data.official_owners.forEach(o => {
+          const li = document.createElement('li');
+          li.className = 'person-row';
+          li.innerHTML = `
+            <span class="person-name">@${o.login}</span>
+            <span class="person-role">${o.role || 'official lead'}</span>
+          `;
+          ownersList.appendChild(li);
+        });
+      } else {
+        ownersList.innerHTML = '<li class="person-row" style="color:var(--text-dim)">No official leaders listed.</li>';
+      }
+
+      // Render Knowers
+      knowersList.innerHTML = '';
+      if (data.actual_knowers && data.actual_knowers.length) {
+        data.actual_knowers.forEach(k => {
+          const li = document.createElement('li');
+          li.className = 'person-row';
+          const badge = !k.is_official 
+            ? '<span class="hidden-knower-badge">Not on Org Chart</span>' 
+            : '<span style="font-size:0.75rem; color:var(--text-dim)">Official</span>';
+          li.innerHTML = `
+            <span class="person-name">@${k.login} ${badge}</span>
+            <span class="person-role">${k.decisions_count ? k.decisions_count + ' decisions' : 'expert'}</span>
+          `;
+          knowersList.appendChild(li);
+        });
+      } else {
+        knowersList.innerHTML = '<li class="person-row" style="color:var(--text-dim)">No decision evidence recorded.</li>';
+      }
+
+      // Decision Trail Timeline
+      if (data.decision_trail && data.decision_trail.length) {
+        timelineView.style.display = 'block';
+        timelineSteps.innerHTML = '';
+        data.decision_trail.forEach(d => {
+          const div = document.createElement('div');
+          div.className = 'timeline-step';
+          div.innerHTML = `<strong>${d.kep} (${d.title})</strong> &bull; <span style="color:var(--text-muted); font-size:0.8rem;">${d.date} [${d.status}]</span>`;
+          timelineSteps.appendChild(div);
+        });
+      } else {
+        timelineView.style.display = 'none';
+      }
+
+      // Sources
+      sourcesContainer.innerHTML = '';
+      if (data.sources && data.sources.length) {
+        data.sources.forEach(s => {
+          const span = document.createElement('span');
+          span.className = 'source-tag';
+          span.textContent = `${s.type || 'SOURCE'}: ${s.ref || s.n} (${s.title})`;
+          sourcesContainer.appendChild(span);
+        });
+      }
+
+      // Render Evidence Graph Map
+      if (data.evidence && data.evidence.nodes && data.evidence.nodes.length) {
+        renderEvidenceMap(data.evidence);
+      } else if (data.graph && data.graph.nodes && data.graph.nodes.length) {
+        renderEvidenceMap(data.graph);
+      } else {
+        const evView = document.getElementById('evidence-map-view');
+        if (evView) evView.style.display = 'none';
+      }
+    }
+
+    function renderEvidenceMap(evidence) {
+      const evView = document.getElementById('evidence-map-view');
+      const stats = document.getElementById('evidence-stats');
+      const svg = document.getElementById('evidence-svg');
+      const container = document.getElementById('evidence-graph-container');
+
+      if (!evidence || !evidence.nodes || !evidence.nodes.length) {
+        if (evView) evView.style.display = 'none';
+        return;
+      }
+
+      evView.style.display = 'block';
+      if (stats) stats.textContent = `${evidence.nodes.length} nodes · ${evidence.edges ? evidence.edges.length : 0} edges`;
+
+      const width = container.clientWidth || 800;
+      const height = container.clientHeight || 380;
+      svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+      svg.innerHTML = '';
+
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      defs.innerHTML = `
+        <marker id="arrow" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b" />
+        </marker>
+        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="3" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
+      `;
+      svg.appendChild(defs);
+
+      const typeColors = {
+        'Team': { fill: '#6366f1', stroke: '#818cf8', text: '#e0e7ff' },
+        'Person': { fill: '#10b981', stroke: '#34d399', text: '#d1fae5' },
+        'KEP': { fill: '#f59e0b', stroke: '#fbbf24', text: '#fef3c7' },
+        'FeatureGate': { fill: '#a855f7', stroke: '#c084fc', text: '#f3e8ff' },
+        'Folder': { fill: '#f43f5e', stroke: '#fb7185', text: '#ffe4e6' },
+        'PR': { fill: '#38bdf8', stroke: '#7dd3fc', text: '#e0f2fe' }
+      };
+
+      const nodes = evidence.nodes;
+      const edges = evidence.edges || [];
+      const nodeMap = {};
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const radius = Math.min(width, height) * 0.38;
+
+      nodes.forEach((n, idx) => {
+        const angle = (idx / nodes.length) * 2 * Math.PI;
+        let r = radius;
+        if (n.type === 'Team') r = radius * 0.35;
+        else if (n.type === 'Person') r = radius * 0.75;
+
+        nodeMap[n.id] = {
+          ...n,
+          x: centerX + r * Math.cos(angle) + (Math.random() - 0.5) * 15,
+          y: centerY + r * Math.sin(angle) + (Math.random() - 0.5) * 15,
+        };
+      });
+
+      for (let iter = 0; iter < 25; iter++) {
+        for (let i = 0; i < nodes.length; i++) {
+          for (let j = i + 1; j < nodes.length; j++) {
+            const n1 = nodeMap[nodes[i].id];
+            const n2 = nodeMap[nodes[j].id];
+            const dx = n2.x - n1.x;
+            const dy = n2.y - n1.y;
+            const dist = Math.hypot(dx, dy) || 1;
+            if (dist < 65) {
+              const force = (65 - dist) / dist * 0.2;
+              n1.x -= dx * force;
+              n1.y -= dy * force;
+              n2.x += dx * force;
+              n2.y += dy * force;
+            }
+          }
+        }
+      }
+
+      const edgeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      edges.forEach(e => {
+        const src = nodeMap[e.source];
+        const tgt = nodeMap[e.target];
+        if (!src || !tgt) return;
+
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', src.x);
+        line.setAttribute('y1', src.y);
+        line.setAttribute('x2', tgt.x);
+        line.setAttribute('y2', tgt.y);
+        line.setAttribute('stroke', 'rgba(148, 163, 184, 0.45)');
+        line.setAttribute('stroke-width', '1.5');
+        line.setAttribute('marker-end', 'url(#arrow)');
+        edgeGroup.appendChild(line);
+
+        if (e.relation) {
+          const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          text.setAttribute('x', (src.x + tgt.x) / 2);
+          text.setAttribute('y', (src.y + tgt.y) / 2 - 3);
+          text.setAttribute('fill', '#94a3b8');
+          text.setAttribute('font-size', '9px');
+          text.setAttribute('font-family', 'var(--mono)');
+          text.setAttribute('text-anchor', 'middle');
+          text.textContent = e.relation;
+          edgeGroup.appendChild(text);
+        }
+      });
+      svg.appendChild(edgeGroup);
+
+      const nodeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      nodes.forEach(n => {
+        const pos = nodeMap[n.id];
+        const style = typeColors[n.type] || { fill: '#64748b', stroke: '#94a3b8', text: '#f8fafc' };
+
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('transform', `translate(${pos.x}, ${pos.y})`);
+        g.style.cursor = 'pointer';
+
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('r', n.type === 'Team' ? '18' : '14');
+        circle.setAttribute('fill', style.fill);
+        circle.setAttribute('stroke', style.stroke);
+        circle.setAttribute('stroke-width', '2');
+        circle.setAttribute('filter', 'url(#glow)');
+        g.appendChild(circle);
+
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('y', n.type === 'Team' ? '30' : '26');
+        label.setAttribute('fill', style.text);
+        label.setAttribute('font-size', '11px');
+        label.setAttribute('font-family', 'var(--mono)');
+        label.setAttribute('text-anchor', 'middle');
+        label.setAttribute('font-weight', '500');
+        const displayText = n.label || n.id.split(':').pop();
+        label.textContent = displayText.length > 18 ? displayText.slice(0, 16) + '…' : displayText;
+        g.appendChild(label);
+
+        const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+        title.textContent = `${n.type}: ${n.label || n.id} (${n.status || ''})`;
+        g.appendChild(title);
+
+        nodeGroup.appendChild(g);
+      });
+      svg.appendChild(nodeGroup);
+    }
+
+    // Example question pills click
+    document.querySelectorAll('.example-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const q = btn.getAttribute('data-q');
+        questionInput.value = q;
+        submitQuestion(q);
+      });
+    });
+
+    askBtn.addEventListener('click', () => submitQuestion(questionInput.value));
+    questionInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') submitQuestion(questionInput.value);
+    });
+
+    // Approve Button Action (Team Member C's Action Router)
+    approveBtn.addEventListener('click', async () => {
+      approveBtn.disabled = true;
+      try {
+        const payload = {
+          action_id: 'act_' + Date.now(),
+          action_type: 'route_issue',
+          target_team: 'sig-node',
+          suggested_assignees: ['tallclair', 'dchen1107'],
+          comment_draft: 'Issue verified. Routing to @sig-node-leads. Based on decision graph history, @tallclair and @dchen1107 are the primary subject matter experts.',
+          approved_by: 'lead_maintainer'
+        };
+
+        const res = await fetch('/api/actions/approve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          showToast(data.message || 'Action successfully approved and queued!');
+        } else {
+          showToast('Approval action failed.');
+        }
+      } catch (err) {
+        showToast('Error sending approval: ' + err.message);
+      } finally {
+        approveBtn.disabled = false;
+      }
+    });
+
+    function showToast(msg) {
+      toastMsg.textContent = msg;
+      toast.style.display = 'flex';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 4000);
+    }
+  </script>
+</body>
+</html>

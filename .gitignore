@@ -1,0 +1,35 @@
+# Environment variables - NEVER commit .env
+.env
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/
+
+# Local databases and graph files
+*.db
+*.db*
+k8s_brain.db*
+# Raw downloads stay local; only the small, hand-made alias list is shared.
+data/*
+!data/aliases.yaml
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo

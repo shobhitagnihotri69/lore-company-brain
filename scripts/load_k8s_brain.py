@@ -61,7 +61,7 @@ def minor(v):
     return int(m.group(1)) if m else None
 
 # ---------- read the team registry ----------
-org = yaml.safe_load(open(os.path.join(data_dir, "community", "sigs.yaml")))
+org = yaml.safe_load(open(os.path.join(data_dir, "community", "sigs.yaml"), encoding="utf-8"))
 teams, leads, subprojects = [], [], []
 for kind, group in (("sig", "sigs"), ("workinggroup", "workinggroups"), ("committee", "committees")):
     for t in org.get(group) or []:
@@ -79,7 +79,7 @@ for kind, group in (("sig", "sigs"), ("workinggroup", "workinggroups"), ("commit
 keps, people_edges, team_edges, kep_links, gates, stages = [], [], [], [], [], []
 for f in glob.glob(os.path.join(data_dir, "enhancements", "keps", "**", "kep.yaml"), recursive=True):
     try:
-        k = yaml.safe_load(open(f)) or {}
+        k = yaml.safe_load(open(f, encoding="utf-8")) or {}
     except Exception:
         continue
     num = str(k.get("kep-number", "")).strip()
@@ -90,6 +90,8 @@ for f in glob.glob(os.path.join(data_dir, "enhancements", "keps", "**", "kep.yam
         "num": num, "title": str(k.get("title", "")), "status": str(k.get("status", "")),
         "stage": str(k.get("stage", "")), "created": str(k.get("creation-date", "")),
         "latest": str(k.get("latest-milestone", "")), "latest_minor": minor(k.get("latest-milestone")) or -1,
+        # Folder inside kubernetes/enhancements, e.g. keps/sig-scheduling/4671-gang-scheduling (for links)
+        "path": os.path.relpath(os.path.dirname(f), os.path.join(data_dir, "enhancements")).replace(os.sep, "/"),
     })
     for role, field in (("AUTHORED", "authors"), ("REVIEWED", "reviewers"), ("APPROVED", "approvers")):
         for p in k.get(field) or []:
@@ -139,7 +141,7 @@ load("""UNWIND $rows AS r MATCH (t:Team {key:r.team})
         MERGE (s:Subproject {name:r.name}) MERGE (t)-[:HAS_SUBPROJECT]->(s)""", subprojects)
 load("""UNWIND $rows AS r MERGE (k:KEP {num:r.num})
         SET k.title=r.title, k.status=r.status, k.stage=r.stage, k.created=r.created,
-            k.latest=r.latest, k.latest_minor=r.latest_minor""", keps)
+            k.latest=r.latest, k.latest_minor=r.latest_minor, k.path=r.path""", keps)
 for role in ("AUTHORED", "REVIEWED", "APPROVED"):
     load(f"""UNWIND $rows AS r MATCH (k:KEP {{num:r.num}})
              MERGE (p:Person {{login:r.login}}) ON CREATE SET p.display=r.display
